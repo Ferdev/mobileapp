@@ -1,5 +1,6 @@
 package coredevices.ring.service.recordings.button
 
+import coredevices.ring.service.copiedToClipboardNotification
 import coredevices.ring.service.recordings.RecordingProcessingQueue
 import coredevices.util.SystemClipboard
 import kotlinx.coroutines.test.runTest
@@ -15,23 +16,41 @@ class CopyToClipboardRecordingOperationTest {
 
     @Test
     fun transcriptIsCopiedToTheClipboard() = runTest {
-        CopyToClipboardRecordingOperation(FakeTranscribing("buy milk"), clipboard).run(null)
+        CopyToClipboardRecordingOperation(FakeTranscribing("buy milk"), clipboard) {}.run(null)
 
         assertEquals(listOf("buy milk"), copied)
     }
 
     @Test
     fun blankTranscriptLeavesTheClipboardAlone() = runTest {
-        CopyToClipboardRecordingOperation(FakeTranscribing("  "), clipboard).run(null)
+        CopyToClipboardRecordingOperation(FakeTranscribing("  "), clipboard) {}.run(null)
 
         assertTrue(copied.isEmpty())
+    }
+
+    @Test
+    fun userIsToldOnlyWhenSomethingWasCopied() = runTest {
+        val told = mutableListOf<String>()
+
+        CopyToClipboardRecordingOperation(FakeTranscribing("buy milk"), clipboard) { told += it }.run(null)
+        CopyToClipboardRecordingOperation(FakeTranscribing("  "), clipboard) { told += it }.run(null)
+
+        assertEquals(listOf("buy milk"), told)
+    }
+
+    @Test
+    fun copiedNotificationNamesTheRingAndShowsTheTranscript() {
+        val notification = copiedToClipboardNotification("buy milk")
+
+        assertEquals("Index 01: transcription copied", notification.title)
+        assertEquals("buy milk", notification.contentText)
     }
 
     /** The webhook decorator hooks the same transcript, so it has to be passed on. */
     @Test
     fun transcriptIsPassedOnToTheOuterHook() = runTest {
         val passedOn = mutableListOf<String>()
-        val operation = CopyToClipboardRecordingOperation(FakeTranscribing("buy milk"), clipboard)
+        val operation = CopyToClipboardRecordingOperation(FakeTranscribing("buy milk"), clipboard) {}
         operation.onTranscriptionPersisted = { passedOn += it }
 
         operation.run(null)
@@ -42,7 +61,7 @@ class CopyToClipboardRecordingOperationTest {
 
     @Test
     fun failedTranscriptionCopiesNothing() = runTest {
-        val operation = CopyToClipboardRecordingOperation(FakeTranscribing(null), clipboard)
+        val operation = CopyToClipboardRecordingOperation(FakeTranscribing(null), clipboard) {}
 
         assertFailsWith<IllegalStateException> { operation.run(null) }
         assertTrue(copied.isEmpty())
