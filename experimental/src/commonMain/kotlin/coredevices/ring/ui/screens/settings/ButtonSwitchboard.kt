@@ -13,8 +13,10 @@ import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Block
 import androidx.compose.material.icons.filled.Check
@@ -368,65 +370,67 @@ private fun GestureDestinationSheet(
     val colors = IndexTheme.colors
     ModalBottomSheet(
         onDismissRequest = onDismiss,
-        sheetState = rememberModalBottomSheetState(),
+        sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
         containerColor = colors.sheetSurface,
     ) {
-        Row(
-            modifier = Modifier.padding(start = 16.dp, end = 16.dp, bottom = 10.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(10.dp),
-        ) {
-            GestureGlyph(
-                gesture = gesture,
-                color = if (gesture.kind == GestureKind.Recording) colors.primary
-                else colors.onSurface,
-            )
-            Text(
-                gesture.gestureLabel,
-                fontSize = 16.sp,
-                fontWeight = FontWeight.Medium,
-                color = colors.onSurface,
-            )
-        }
-        destinationsFor(gesture.kind).forEach { option ->
-            DestinationOption(
-                option = option,
-                selected = option == current,
-                onClick = { onSelect(option) },
-            )
-        }
-        if (gesture.kind == GestureKind.Recording &&
-            current != GestureDestination.WebhookOnly &&
-            current != GestureDestination.Nothing
-        ) {
-            HorizontalDivider(
-                color = colors.outlineVariant,
-                modifier = Modifier.padding(horizontal = 16.dp, vertical = 10.dp),
-            )
-            WebhookSheetRow(
-                icon = Icons.Default.Webhook,
-                title = "Also send to webhook",
-                webhookUrl = webhookUrl,
-                onClick = onOpenWebhookSettings,
+        Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
+            Row(
+                modifier = Modifier.padding(start = 16.dp, end = 16.dp, bottom = 10.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(10.dp),
             ) {
-                Switch(checked = webhookCopyOn, onCheckedChange = onSetWebhookCopy)
-            }
-        }
-        if (gesture.kind == GestureKind.Recording &&
-            (current == GestureDestination.WebhookOnly || webhookCopyOn)
-        ) {
-            WebhookSheetRow(
-                icon = Icons.Default.SettingsEthernet,
-                title = "Webhook settings",
-                webhookUrl = webhookUrl,
-                onClick = onOpenWebhookSettings,
-            ) {
-                Icon(
-                    Icons.Default.ChevronRight,
-                    contentDescription = null,
-                    tint = colors.onSurfaceVariant,
-                    modifier = Modifier.size(18.dp),
+                GestureGlyph(
+                    gesture = gesture,
+                    color = if (gesture.kind == GestureKind.Recording) colors.primary
+                    else colors.onSurface,
                 )
+                Text(
+                    gesture.gestureLabel,
+                    fontSize = 16.sp,
+                    fontWeight = FontWeight.Medium,
+                    color = colors.onSurface,
+                )
+            }
+            destinationsFor(gesture.kind).forEach { option ->
+                DestinationOption(
+                    option = option,
+                    selected = option == current,
+                    onClick = { onSelect(option) },
+                )
+            }
+            if (gesture.kind == GestureKind.Recording &&
+                current != GestureDestination.WebhookOnly &&
+                current != GestureDestination.Nothing
+            ) {
+                HorizontalDivider(
+                    color = colors.outlineVariant,
+                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 10.dp),
+                )
+                WebhookSheetRow(
+                    icon = Icons.Default.Webhook,
+                    title = "Also send to webhook",
+                    webhookUrl = webhookUrl,
+                    onClick = onOpenWebhookSettings,
+                ) {
+                    Switch(checked = webhookCopyOn, onCheckedChange = onSetWebhookCopy)
+                }
+            }
+            if (gesture.kind == GestureKind.Recording &&
+                (current == GestureDestination.WebhookOnly || webhookCopyOn)
+            ) {
+                WebhookSheetRow(
+                    icon = Icons.Default.SettingsEthernet,
+                    title = "Webhook settings",
+                    webhookUrl = webhookUrl,
+                    onClick = onOpenWebhookSettings,
+                ) {
+                    Icon(
+                        Icons.Default.ChevronRight,
+                        contentDescription = null,
+                        tint = colors.onSurfaceVariant,
+                        modifier = Modifier.size(18.dp),
+                    )
+                }
             }
         }
     }
