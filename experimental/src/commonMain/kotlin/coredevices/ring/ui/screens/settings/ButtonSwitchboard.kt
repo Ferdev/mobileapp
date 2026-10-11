@@ -19,6 +19,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Block
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Cloud
+import androidx.compose.material.icons.filled.ContentCopy
 import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material.icons.filled.GraphicEq
 import androidx.compose.material.icons.filled.PlayArrow
@@ -95,6 +96,7 @@ fun destinationsFor(kind: GestureKind): List<GestureDestination> = when (kind) {
         GestureDestination.LocalAgent,
         GestureDestination.WebSearch,
         GestureDestination.WebhookOnly,
+        GestureDestination.CopyToClipboard,
         GestureDestination.Nothing,
     )
 }
@@ -116,6 +118,7 @@ val GestureDestination.tileLabel: String
         GestureDestination.RemoteAgent -> "Remote Index agent"
         GestureDestination.WebSearch -> "Web search"
         GestureDestination.WebhookOnly -> "Webhook only"
+        GestureDestination.CopyToClipboard -> "Copy to clipboard"
         GestureDestination.Nothing -> "Nothing"
     }
 
@@ -133,6 +136,7 @@ private val GestureDestination.optionSub: String?
         GestureDestination.RemoteAgent -> "Takes actions for you in the cloud, needs a connection"
         GestureDestination.WebSearch -> "Answer lands in your feed"
         GestureDestination.WebhookOnly -> "Raw recording to your endpoint, nothing else"
+        GestureDestination.CopyToClipboard -> "Transcript to this phone's clipboard, nothing else"
         else -> null
     }
 
@@ -145,6 +149,7 @@ private val GestureDestination.icon: ImageVector
         GestureDestination.RemoteAgent -> Icons.Default.Cloud
         GestureDestination.WebSearch -> Icons.Default.Search
         GestureDestination.WebhookOnly -> Icons.Default.Webhook
+        GestureDestination.CopyToClipboard -> Icons.Default.ContentCopy
         GestureDestination.Nothing -> Icons.Default.Block
     }
 
